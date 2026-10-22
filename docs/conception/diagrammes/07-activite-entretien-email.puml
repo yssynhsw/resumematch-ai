@@ -1,0 +1,45 @@
+@startuml activite-entretien-email
+title ResumeMatch AI — Diagramme d'activité : entretien in-app et e-mail de candidature
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam activity {
+  BackgroundColor #F3FAF6
+  BorderColor #1F4D3E
+  DiamondBackgroundColor #DCEFE6
+  DiamondBorderColor #1F4D3E
+}
+skinparam swimlane {
+  BorderColor #2F8F73
+  TitleFontColor #14352B
+}
+
+|Candidat|
+start
+:Ouvrir la page Entretiens;
+:Choisir le CV et le type\n(technique ou soft skills);
+|API Django|
+:Lire les compétences du CV\n(parsed_data);
+|Service IA|
+:Une question par compétence\n(Gemini, ou brouillon local);
+|Candidat|
+:Répondre aux questions;
+|Service IA|
+:Noter chaque réponse (0–100);\nErreurs (comment) et axe de travail (focus);
+|API Django|
+:Enregistrer ApplicantInterview;
+:Score principal = moyenne\ndes entretiens notés;
+if (Type technique et compétences faibles ?) then (oui)
+  :Proposer jusqu'à 4 cours\n(documentation officielle);
+else (non)
+endif
+|Candidat|
+:Ouvrir « E-mail de candidature »;
+|API Django|
+:Rassembler CV, offre\net réponses d'entretien notées;
+|Service IA|
+:Rédiger l'e-mail en 6 parties\n(100–180 mots, Gemini);
+|Candidat|
+:Modifier l'objet et le corps;
+:Enregistrer ou ouvrir le mailto;
+stop
+@enduml

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Rapport — E-mail de candidature · ResumeMatch AI</title>
+<style>
+  :root {
+    --forest: #14352b;
+    --leaf: #2f6b55;
+    --moss: #5d7368;
+    --sand: #f4f0e6;
+    --paper: #fffcf7;
+    --coral: #c45c26;
+    --mint: #d8e8df;
+    --line: #e4ddd0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--sand); color: var(--forest); font: 15px/1.55 Georgia, "Times New Roman", serif; }
+  .sheet { max-width: 920px; margin: 32px auto 64px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(20,53,43,.08); }
+  header.cover { background: var(--forest); color: var(--sand); padding: 42px 48px 32px; }
+  .kicker { letter-spacing: .22em; font: 11px/1.4 ui-sans-serif, system-ui, sans-serif; text-transform: uppercase; color: #d8e8df; }
+  h1 { font-weight: 600; font-size: 40px; margin: 10px 0 8px; letter-spacing: -.02em; }
+  .lede { max-width: 68ch; color: #efe8da; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip { background: rgba(255,252,247,.1); border: 1px solid rgba(216,232,223,.35); color: var(--sand); padding: 8px 12px; border-radius: 999px; font: 12px/1.2 ui-sans-serif, system-ui, sans-serif; }
+  .chip b { display: block; font-size: 13px; }
+  main { padding: 8px 48px 48px; }
+  h2 { font-size: 22px; margin: 36px 0 8px; padding-top: 8px; border-top: 2px solid var(--mint); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  .num { font: 12px ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em; color: var(--coral); }
+  p { margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font: 13px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { background: var(--mint); color: var(--forest); font-weight: 650; }
+  code, pre { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  pre { background: #102820; color: #e7f3ec; padding: 14px 16px; border-radius: 10px; overflow: auto; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #f7f4ec; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card h3 { margin-top: 0; }
+  .bf { border-left: 3px solid var(--coral); padding: 4px 0 4px 12px; margin: 12px 0; }
+  .bf strong { font: 13px ui-sans-serif, system-ui, sans-serif; }
+  ol.struct { margin: 8px 0 8px 1.2em; padding: 0; }
+  footer { padding: 18px 48px 28px; color: var(--moss); font: 12px ui-sans-serif, system-ui, sans-serif; border-top: 1px solid var(--line); }
+  @media print { body { background: white; } .sheet { margin: 0; box-shadow: none; border: 0; } }
+</style>
+</head>
+<body>
+<article class="sheet">
+<header class="cover">
+  <div class="kicker">Rapport de module · ResumeMatch AI · Indépendant de la gestion des comptes</div>
+  <h1>E-mail de candidature</h1>
+  <p class="lede">Module qui rédige un e-mail prêt à envoyer pour une candidature déjà analysée. Il assemble le CV, le poste et, s’ils existent, les propos de l’entretien. Il n’inscrit personne, ne connecte personne et ne calcule pas le score de compatibilité.</p>
+  <div class="chips">
+    <span class="chip"><b>Application</b>Django outreach</span>
+    <span class="chip"><b>100–180 mots</b>Objet, appel, motif, contexte, demande, signature</span>
+    <span class="chip"><b>JWT requis</b>Brouillon visible seulement par son auteur</span>
+    <span class="chip"><b>Moteur</b>Gemini · puce visible hors mock</span>
+    <span class="chip"><b>Sortie</b>Édition, copie, mailto</span>
+  </div>
+</header>
+<main>
+  <h2><span class="num">01 · </span>Problématique</h2>
+  <p>Le score et la lettre de motivation ne sont pas un message que l’on envoie à un recruteur. Ce module produit un brouillon court, modifiable, qui dit pourquoi la personne écrit, quelles compétences du CV justifient la candidature, et ce qu’elle a répondu à l’entretien si celui-ci a été noté.</p>
+  <div class="grid">
+    <div class="card"><h3>Entrées</h3><p>Une analyse appartenant à l’utilisateur : titre, entreprise, score, compétences extraites du CV, texte du CV. Les réponses d’entretien notées, d’abord celles du CV (<code>ApplicantInterview</code>), sinon celles de l’offre (<code>InterviewAttempt</code>).</p></div>
+    <div class="card"><h3>Sortie</h3><p>Un <code>ApplicationEmail</code> : objet, corps, compétences, langue, <code>used_interview</code> et <code>ai_mode</code> (<code>gemini</code> si le modèle ou le cache a répondu, sinon <code>mock</code>). Un brouillon <code>gemini</code> affiche « Rédigé avec Gemini ». Le candidat peut corriger le texte puis l’ouvrir dans sa messagerie.</p></div>
+  </div>
+
+  <h2><span class="num">02 · </span>Besoins</h2>
+  <p>Ces besoins décrivent le travail propre du module. Aucun ne concerne l’inscription, le mot de passe ou le profil.</p>
+  <div class="bf"><strong>BF-M1 · Générer pour une analyse.</strong> <code>POST /api/outreach/</code> avec <code>analysis_id</code> et <code>language</code> (<code>fr</code> ou <code>en</code>). Réponse 201 avec le brouillon. L’analyse doit appartenir à l’appelant.</div>
+  <div class="bf"><strong>BF-M2 · Structure imposée.</strong> Objet explicite, formule d’appel, phrase d’intention, contexte (compétences réelles, puis extraits d’entretien s’il y en a), une demande d’échange, un remerciement, une formule de politesse et le nom.</div>
+  <div class="bf"><strong>BF-M3 · Longueur.</strong> Le corps vise 100 à 180 mots. Le mock raccourcit les citations d’entretien jusqu’à entrer dans cette borne.</div>
+  <div class="bf"><strong>BF-M4 · Ne rien inventer.</strong> Le prompt interdit d’ajouter une expérience ou un nom absent des données. Les compétences viennent de <code>parsed_data</code>, sinon des compétences présentes de l’analyse, au plus 12.</div>
+  <div class="bf"><strong>BF-M5 · Entretien optionnel.</strong> Sans entretien noté, l’e-mail reste valable et <code>used_interview</code> est faux. Avec des réponses, le contexte cite l’environnement de travail et le soft skill quand ces catégories sont présentes.</div>
+  <div class="bf"><strong>BF-M6 · Édition.</strong> <code>PUT /api/outreach/{id}/</code> modifie l’objet et le corps. Compétences, langue, analyse, <code>ai_mode</code> et dates restent en lecture seule.</div>
+  <div class="bf"><strong>BF-M7 · Liste.</strong> <code>GET /api/outreach/</code> renvoie les brouillons de l’utilisateur, filtrables par <code>?analysis=</code>, limités aux 20 plus récents.</div>
+  <div class="bf"><strong>BF-M8 · Envoi côté client.</strong> L’interface copie le message ou ouvre un lien <code>mailto:</code>. Le serveur n’envoie pas l’e-mail.</div>
+  <div class="bf"><strong>BNF-M1 · Isolation.</strong> Un autre compte ne voit pas les brouillons. Le test <code>lea</code> reçoit une liste vide.</div>
+  <div class="bf"><strong>BNF-M2 · Moteur remplaçable.</strong> <code>ai.run_prompt</code> valide un JSON <code>{subject, body}</code>. Sans clé API, <code>_mock_email</code> produit le même plan et <code>ai_mode</code> vaut <code>mock</code>. Un objet vide retombe sur le mock. Si l’appel touche le modèle ou son cache, <code>ai_mode</code> vaut <code>gemini</code>. Avec la clé actuelle, ce prompt part vers <code>gemini-flash-lite-latest</code>.</div>
+  <div class="bf"><strong>BNF-M3 · Progression visible.</strong> Sous le bouton de génération, une barre avance pendant l’appel puis atteint 100 % à la réponse. Elle ne s’affiche pas pendant un simple enregistrement.</div>
+  <div class="bf"><strong>BNF-M4 · Marque du moteur.</strong> La puce Gemini suit le statut système (fournisseur Gemini ou Google, hors mock). Le libellé « Rédigé avec Gemini » suit le brouillon : il n’apparaît que si <code>ai_mode</code> vaut <code>gemini</code>.</div>
+  <div class="bf"><strong>BNF-M5 · Quota.</strong> La création d’un brouillon est un POST soumis au quota IA. La liste des brouillons n’est pas limitée par ce quota.</div>
+
+  <h2><span class="num">03 · </span>Architecture</h2>
+  <pre>backend/outreach/
+  models.py       ApplicationEmail, champ ai_mode
+  services.py     compétences, extraits d’entretien, prompt, mock
+  serializers.py  lecture / création
+  views.py        liste, création, mise à jour
+  urls.py         /api/outreach/
+  tests.py        structure, longueur, isolation
+frontend/src/
+  components/ApplicationEmail.jsx    bouton, puce Gemini
+  components/GeminiMark.jsx          même puce que l’entretien
+  components/GenerationProgress.jsx  barre sous le bouton
+  pages/EmailAppliancePage.jsx       une carte par analyse
+  api.js                             createApplicationEmail, updateApplicationEmail</pre>
+  <p>Monté dans <code>config/urls.py</code> par <code>path("api/outreach/", include("outreach.urls"))</code>. L’authentification par défaut du projet reste JWT : ce module ne redéfinit pas le login.</p>
+
+  <h2><span class="num">04 · </span>API</h2>
+  <table>
+    <tr><th>Méthode</th><th>Chemin</th><th>Corps</th><th>Effet</th></tr>
+    <tr><td>GET</td><td><code>/api/outreach/</code></td><td>—</td><td>Brouillons de l’utilisateur. Query <code>analysis</code> facultative.</td></tr>
+    <tr><td>POST</td><td><code>/api/outreach/</code></td><td><code>analysis_id</code>, <code>language</code></td><td>Crée un brouillon. 201.</td></tr>
+    <tr><td>PUT</td><td><code>/api/outreach/{id}/</code></td><td><code>subject</code>, <code>body</code></td><td>Met à jour le texte. 200.</td></tr>
+  </table>
+  <h3>Champs stockés</h3>
+  <table>
+    <tr><th>Champ</th><th>Rôle</th><th>Modifiable par PUT</th></tr>
+    <tr><td>subject</td><td>Objet, 200 caractères</td><td>Oui</td></tr>
+    <tr><td>body</td><td>Corps du message</td><td>Oui</td></tr>
+    <tr><td>skills</td><td>Compétences réellement utilisées</td><td>Non</td></tr>
+    <tr><td>used_interview</td><td>Vrai si des réponses notées ont été citées</td><td>Non</td></tr>
+    <tr><td>language</td><td><code>fr</code> ou <code>en</code></td><td>Non</td></tr>
+    <tr><td>ai_mode</td><td><code>gemini</code> si le modèle ou le cache a répondu, sinon <code>mock</code></td><td>Non</td></tr>
+    <tr><td>analysis</td><td>Candidature source</td><td>Non</td></tr>
+  </table>
+
+  <h2><span class="num">05 · </span>Flux de génération</h2>
+  <ol class="struct">
+    <li>Le candidat clique « Rédiger l’e-mail » ou « Régénérer ». La barre de progression démarre.</li>
+    <li>L’API charge l’analyse, le CV et l’offre, uniquement si <code>user</code> est le propriétaire.</li>
+    <li><code>_skills</code> lit les compétences techniques et humaines du CV.</li>
+    <li><code>_interview_lines</code> préfère les entretiens CV notés. À défaut, l’entretien d’offre noté. Huit échanges au plus.</li>
+    <li>Le prompt impose l’ordre du message et le JSON <code>subject</code> / <code>body</code>.</li>
+    <li>Pydantic normalise le texte. L’objet est tronqué à 200 caractères.</li>
+    <li>La ligne est enregistrée avec <code>ai_mode</code> égal à <code>gemini</code> ou <code>mock</code>. L’interface affiche l’objet et le corps, éditables, la puce du moteur, le libellé du brouillon, plus copier et <code>mailto:</code>.</li>
+  </ol>
+
+  <h2><span class="num">06 · </span>Prompt réel envoyé au moteur</h2>
+  <p>Le texte vit dans <code>outreach/services.py</code>, fonction <code>create_application_email</code>. Il exige un JSON strict et cette structure :</p>
+  <ol class="struct">
+    <li>Objet qui annonce le but (« Candidature au poste de… » ou « Application for… »).</li>
+    <li>Appel : nom du destinataire s’il est dans l’offre, sinon « Madame, Monsieur, » ou « Dear Hiring Manager, ».</li>
+    <li>Première phrase : pourquoi la personne écrit.</li>
+    <li>Contexte : compétences du CV, puis environnement de travail et soft skill s’ils figurent dans l’entretien.</li>
+    <li>Une demande : proposer d’en discuter.</li>
+    <li>Remerciement et formule de politesse, suivis du nom complet.</li>
+  </ol>
+  <p>Langage familier, abréviations, emoji et expériences inventées sont exclus. La langue demandée est celle du bouton (français ou anglais).</p>
+
+  <h2><span class="num">07 · </span>Ce que le test vérifie</h2>
+  <p><code>outreach/tests.py</code>, avec le moteur mock :</p>
+  <ul>
+    <li>HTTP 201, objet « Application for » plus le titre du poste.</li>
+    <li>Le corps commence par « Dear Hiring Manager, », contient l’entreprise, une compétence du CV, une phrase de l’entretien, la demande et « Best regards ».</li>
+    <li>Entre 100 et 180 mots.</li>
+    <li><code>used_interview</code> est vrai et la compétence de tête est React.</li>
+    <li>La liste filtrée par analyse contient le brouillon.</li>
+    <li>Un second utilisateur authentifié reçoit une liste vide.</li>
+  </ul>
+
+  <h2><span class="num">08 · </span>Limites</h2>
+  <ul>
+    <li>Aucun e-mail ne part du serveur. <code>mailto:</code> dépend du client de messagerie du candidat et tronque parfois les corps longs.</li>
+    <li>Régénérer crée une nouvelle ligne. Les brouillons précédents restent en base, la liste n’en montre que vingt.</li>
+    <li>La barre sous le bouton est une progression d’interface pendant l’attente. L’API ne publie pas un pourcentage réel.</li>
+    <li><code>ai_mode</code> vaut <code>gemini</code> dès qu’un appel vivant ou un cache a produit le texte, y compris si l’objet vide a ensuite été remplacé par le texte de repli. Le libellé du brouillon lit ce champ. La puce lit le statut système.</li>
+    <li>Si l’offre ne contient pas le nom du recruteur, l’appel reste générique.</li>
+    <li>Le module lit l’entretien. Il ne le note pas et ne modifie pas le score de compatibilité.</li>
+  </ul>
+</main>
+<footer>ResumeMatch AI · Module E-mail de candidature · Mis à jour pour le mode IA enregistré et la puce Gemini · Indépendant du module Gestion des comptes.</footer>
+</article>
+</body>
+</html>

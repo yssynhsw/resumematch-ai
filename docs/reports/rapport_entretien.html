@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Rapport — Entretien · ResumeMatch AI</title>
+<style>
+  :root {
+    --forest: #14352b;
+    --leaf: #2f6b55;
+    --moss: #5d7368;
+    --sand: #f4f0e6;
+    --paper: #fffcf7;
+    --coral: #c45c26;
+    --mint: #d8e8df;
+    --line: #e4ddd0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--sand); color: var(--forest); font: 15px/1.55 Georgia, "Times New Roman", serif; }
+  .sheet { max-width: 920px; margin: 32px auto 64px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(20,53,43,.08); }
+  header.cover { background: var(--forest); color: var(--sand); padding: 42px 48px 32px; }
+  .kicker { letter-spacing: .22em; font: 11px/1.4 ui-sans-serif, system-ui, sans-serif; text-transform: uppercase; color: #d8e8df; }
+  h1 { font-weight: 600; font-size: 40px; margin: 10px 0 8px; letter-spacing: -.02em; }
+  .lede { max-width: 68ch; color: #efe8da; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip { background: rgba(255,252,247,.1); border: 1px solid rgba(216,232,223,.35); color: var(--sand); padding: 8px 12px; border-radius: 999px; font: 12px/1.2 ui-sans-serif, system-ui, sans-serif; }
+  .chip b { display: block; font-size: 13px; }
+  main { padding: 8px 48px 48px; }
+  h2 { font-size: 22px; margin: 36px 0 8px; padding-top: 8px; border-top: 2px solid var(--mint); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  .num { font: 12px ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em; color: var(--coral); }
+  p { margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font: 13px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { background: var(--mint); color: var(--forest); font-weight: 650; }
+  code, pre { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  pre { background: #102820; color: #e7f3ec; padding: 14px 16px; border-radius: 10px; overflow: auto; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #f7f4ec; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card h3 { margin-top: 0; }
+  .bf { border-left: 3px solid var(--coral); padding: 4px 0 4px 12px; margin: 12px 0; }
+  .bf strong { font: 13px ui-sans-serif, system-ui, sans-serif; }
+  footer { padding: 18px 48px 28px; color: var(--moss); font: 12px ui-sans-serif, system-ui, sans-serif; border-top: 1px solid var(--line); }
+  @media print { body { background: white; } .sheet { margin: 0; box-shadow: none; border: 0; } }
+</style>
+</head>
+<body>
+<article class="sheet">
+<header class="cover">
+  <div class="kicker">Rapport de module · ResumeMatch AI · Indépendant de la gestion des comptes</div>
+  <h1>Entretien</h1>
+  <p class="lede">Module qui fait passer un entretien écrit dans l’application, à partir du CV, puis note les réponses. Il ne crée pas de compte, ne délivre pas de jeton JWT et ne gère pas le profil. Il consomme seulement l’identité déjà établie par le module Comptes.</p>
+  <div class="chips">
+    <span class="chip"><b>3 objets</b>Évaluation CV · entretien d’offre · journal</span>
+    <span class="chip"><b>JWT requis</b>Données filtrées par l’utilisateur</span>
+    <span class="chip"><b>Moteur IA</b>Gemini en service · mock si la clé est vide</span>
+    <span class="chip"><b>Score</b>0–100, puis moyenne candidat</span>
+  </div>
+</header>
+<main>
+  <h2><span class="num">01 · </span>Problématique</h2>
+  <p>Une analyse CV / offre mesure des compétences écrites. Elle ne dit pas si le candidat sait expliquer son parcours. Ce module ajoute un entretien passé dans l’interface : des questions, des réponses saisies par le candidat, une note par question, puis une note globale.</p>
+  <div class="grid">
+    <div class="card"><h3>Évaluation de la personne</h3><p><code>ApplicantInterview</code> est lié au CV, pas à une offre. Deux types : technique et soft skills. La moyenne des entretiens notés est enregistrée sur l’utilisateur (<code>user.score</code>).</p></div>
+    <div class="card"><h3>Entretien d’une candidature</h3><p><code>InterviewAttempt</code> est lié à une analyse. Les questions viennent du CV et de l’offre. Après envoi, 20 % de la note d’entretien entre dans le score de compatibilité déjà calculé.</p></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3>Journal, à part</h3><p><code>Interview</code> est un carnet : date, format, questions, retour, issue. Il ne change ni <code>user.score</code> ni le score de l’analyse. Il sert au suivi, pas à la notation.</p></div>
+
+  <h2><span class="num">02 · </span>Besoins</h2>
+  <p>Ces besoins sont ceux que le code réalise. Ils ne reprennent aucun besoin BF du rapport Comptes.</p>
+  <div class="bf"><strong>BF-E1 · Questions depuis le CV.</strong> Pour un CV du candidat, générer un entretien technique (une question par compétence technique) et un entretien soft (une question par soft skill). La liste est limitée à 20 compétences uniques. Le prompt demande au modèle 8 questions au plus ; chaque compétence qu’il omet reçoit la question fixe. Sans compétence du type demandé, une seule question de repli.</div>
+  <div class="bf"><strong>BF-E2 · Réponses dans l’application.</strong> Le candidat écrit une réponse par question. Les conseils de réponse (<code>answer_tips</code>) restent cachés tant que l’entretien n’est pas noté.</div>
+  <div class="bf"><strong>BF-E3 · Notation par le modèle.</strong> Chaque réponse est envoyée au moteur configuré avec la question et les conseils, utilisés comme barème interne. Le modèle renvoie une note 0–100, un commentaire qui cite les erreurs concrètes, et un axe « à travailler » lié à la compétence. Il ne recopie pas le barème. Une réponse vide ou hors sujet reste sous 20. Une réponse précise, avec un exemple réel, dépasse 70. La note d’entretien est la moyenne arrondie. Le résumé « À travailler » reprend jusqu’à quatre axes, en commençant par les notes les plus basses.</div>
+  <div class="bf"><strong>BF-E4 · Note candidat.</strong> Après un entretien CV noté, <code>user.score</code> devient la moyenne arrondie de tous les entretiens CV notés de ce compte. Ce n’est pas le score d’une offre.</div>
+  <div class="bf"><strong>BF-E5 · Entretien d’offre.</strong> Sur une analyse, démarrer un entretien lié au poste. À la soumission, <code>apply_interview_score</code> conserve 80 % des contributions compétences et sémantique et ajoute 20 % de la note d’entretien. Un second envoi ne rétrécit pas deux fois la part CV : les bases sont mémorisées.</div>
+  <div class="bf"><strong>BF-E6 · Questions personnelles.</strong> Un appel avec <code>extend: true</code> ajoute des questions d’environnement et de soft skill, réutilisées plus tard par le module e-mail.</div>
+  <div class="bf"><strong>BF-E7 · Journal.</strong> Créer, modifier et supprimer des comptes rendus d’entretiens réels, rattachés à une analyse, sans effet sur les scores.</div>
+  <div class="bf"><strong>BNF-E1 · Isolation.</strong> Un CV, une analyse ou un journal n’est lisible que par son propriétaire. Un autre compte reçoit 404.</div>
+  <div class="bf"><strong>BNF-E2 · Déjà noté.</strong> Soumettre deux fois le même entretien d’offre renvoie 400. Un entretien CV déjà noté et encore aligné sur les compétences n’est pas régénéré.</div>
+  <div class="bf"><strong>BNF-E3 · Moteur remplaçable.</strong> Questions et notes passent par <code>ai_service</code> (<code>generate_applicant_interview</code>, <code>score_interview_answers</code>). Le fournisseur actif est <code>LLM_PROVIDER</code>. Sans clé, ou si une question n’a pas de note, de commentaire ou d’axe, le repli s’applique : la note vient de la longueur et du recouvrement lexical (moins de 8 caractères vaut 0), et <code>_local_interview_feedback</code> écrit quand même le commentaire et l’axe.</div>
+  <div class="bf"><strong>BNF-E4 · Marque du moteur.</strong> Tant que le statut système indique un fournisseur Gemini ou Google et que le mode n’est pas mock, les titres d’entretien affichent la puce Gemini, au même titre que les logos des sources d’offres.</div>
+  <div class="bf"><strong>BNF-E5 · Quota.</strong> Démarrer ou soumettre un entretien est un POST compté dans le quota IA (<code>AI_THROTTLE_RATE</code>, 30 requêtes par heure et par utilisateur). La lecture reste libre.</div>
+
+  <h2><span class="num">03 · </span>Architecture</h2>
+  <pre>backend/analyses/
+  models.py        Interview, ApplicantInterview, InterviewAttempt
+  services.py      start / submit, séparation technique-soft
+  views.py         vues API
+  urls.py          routes d’offre et journal
+backend/cvs/urls.py
+                   /api/cvs/{id}/interview  (évaluation du CV)
+backend/services/ai_service.py
+                   generate_applicant_interview, score_interview_answers
+backend/services/scoring.py
+                   score_interview_answer (repli), apply_interview_score
+frontend/src/
+  components/LiveInterview.jsx   réponses, note, commentaire
+  components/GeminiMark.jsx      puce du moteur
+  components/InterviewLog.jsx
+  pages/InterviewsPage.jsx       technique et soft
+  api.js                         appels JWT</pre>
+  <p>Le module Comptes fournit l’utilisateur connecté. L’entretien ne valide pas de mot de passe, n’écrit pas <code>level</code> et n’ouvre pas les inscriptions.</p>
+
+  <h2><span class="num">04 · </span>API</h2>
+  <table>
+    <tr><th>Méthode</th><th>Chemin</th><th>Rôle</th></tr>
+    <tr><td>GET / POST</td><td><code>/api/cvs/{id}/interview?kind=technical|soft</code></td><td>Lire ou démarrer l’évaluation du CV</td></tr>
+    <tr><td>POST</td><td><code>/api/cvs/{id}/interview/submit</code></td><td>Noter et mettre à jour <code>user.score</code></td></tr>
+    <tr><td>GET / POST</td><td><code>/api/analyses/{id}/interview</code></td><td>Entretien de l’offre. POST <code>extend</code> ajoute les questions personnelles</td></tr>
+    <tr><td>POST</td><td><code>/api/analyses/{id}/interview/submit</code></td><td>Noter et recombiner le score d’analyse</td></tr>
+    <tr><td>GET</td><td><code>/api/interviews</code></td><td>Journal de l’utilisateur, trié par date</td></tr>
+    <tr><td>GET / POST</td><td><code>/api/analyses/{id}/interviews</code></td><td>Liste et création d’une fiche</td></tr>
+    <tr><td>PATCH / DELETE</td><td><code>/api/analyses/{id}/interviews/{pk}</code></td><td>Modifier ou supprimer une fiche</td></tr>
+  </table>
+
+  <h2><span class="num">05 · </span>Flux</h2>
+  <h3>Évaluation du CV</h3>
+  <p>Le texte du PDF est extrait avant tout appel au modèle, puis les compétences techniques et humaines sont lues dans <code>parsed_data</code>. Le candidat ouvre l’entretien depuis son CV. Le service retient au plus 20 compétences du type demandé et envoie les 5 000 premiers caractères du CV. Une question du modèle n’est gardée que si elle nomme la compétence et porte la bonne catégorie. Sinon une question fixe la remplace. Les conseils ne sont pas renvoyés. À l’envoi, <code>score_interview_answers</code> note chaque réponse. L’écran affiche la note, les erreurs et l’axe à travailler. Le résumé reprend les axes des réponses les plus faibles. L’état passe à <code>scored</code>, puis <code>_update_user_interview_score</code> recalcule la moyenne du compte.</p>
+  <h3>Offre</h3>
+  <p>Le même écran de réponses existe sur la page de résultats. La soumission note de la même façon, puis appelle <code>apply_interview_score</code> avec un poids de 0,2. Le détail du score d’analyse gagne <code>interview_score</code>, <code>interview_weight</code> et <code>interview_contribution</code>. Le résumé « À travailler » est enregistré sur la tentative. Le statut Kanban de la candidature ne change pas.</p>
+
+  <h2><span class="num">06 · </span>Rôle du moteur IA</h2>
+  <p>Deux appels distincts. La lecture du CV, faite à l’envoi du fichier, demande un JSON de compétences au modèle (<code>extract_cv_skills</code>, 12 000 caractères). L’évaluation de la personne demande ensuite une question par compétence, sans citer d’entreprise. L’entretien d’offre réutilise <code>generate_interview_prep</code> : questions technique, comportementale, motivation et lacune, appuyées sur le CV et le poste.</p>
+  <p>La notation est un troisième appel, <code>score_interview_answers</code>. Il demande <code>comment</code> (erreurs de la réponse) et <code>focus</code> (ce qu’il faut travailler ensuite). Le fournisseur actif est Gemini (<code>LLM_PROVIDER=gemini</code>, modèle <code>gemini-flash-lite-latest</code>), via le point d’accès compatible OpenAI. Sans clé, le mock répond : la note est locale, et le commentaire comme l’axe sont quand même rédigés par <code>_local_interview_feedback</code>. La clé reste dans <code>.env</code> et n’est pas écrite dans ce rapport.</p>
+
+  <h2><span class="num">07 · </span>Règles de notation</h2>
+  <table>
+    <tr><th>Cas</th><th>Résultat</th></tr>
+    <tr><td>Réponse vide ou hors sujet, modèle actif</td><td>Sous 20, plus les erreurs et un axe</td></tr>
+    <tr><td>Réponse précise avec un exemple réel, modèle actif</td><td>Au-dessus de 70, plus les erreurs et un axe</td></tr>
+    <tr><td>Repli, texte &lt; 8 caractères</td><td>0, avec un commentaire qui dit que la réponse est trop courte</td></tr>
+    <tr><td>Repli, longueur et recouvrement lexical</td><td>Jusqu’à 55 + 45, plafond 100, plus commentaire et axe selon le palier 55 / 75</td></tr>
+    <tr><td>Plusieurs questions</td><td>Moyenne arrondie, et jusqu’à 4 axes dans « À travailler », les plus faibles d’abord</td></tr>
+    <tr><td>Intégration au score d’offre</td><td><code>0,8 × compétences + 0,8 × sémantique + bonus + 0,2 × entretien</code></td></tr>
+  </table>
+
+  <h2><span class="num">08 · </span>Tests présents dans le dépôt</h2>
+  <p>La suite automatique tourne sans clé, donc elle exerce le repli local, commentaires compris. <code>services/tests_scoring.py</code> vérifie qu’une réponse courte vaut 0, qu’une réponse développée dépasse 50, et qu’appliquer deux fois la même note d’entretien ne change plus le score final. <code>analyses/tests.py</code> couvre le parcours API : démarrage, absence des conseils avant notation, soumission, présence de <code>interview_contribution</code>, et refus d’accès à un autre utilisateur sur le journal. L’appel Gemini de <code>score_interview_answers</code> est le chemin utilisé dès que <code>LLM_API_KEY</code> est renseignée.</p>
+
+  <h2><span class="num">09 · </span>Limites</h2>
+  <ul>
+    <li>La note de réponse n’est pas un oral. Elle mesure un texte écrit, pas la voix ni le temps de parole.</li>
+    <li>En mode mock, le recouvrement lexical favorise les réponses qui reprennent les mots de la question. Une bonne réponse formulée autrement peut alors être sous-notée. Avec Gemini, le jugement porte sur le sens, dans les bornes du prompt.</li>
+    <li>Les conseils restent en base pour noter. Ils ne doivent pas être renvoyés avant <code>scored</code>.</li>
+    <li>Le journal et la note sont deux objets. Confondre les deux ferait croire qu’un compte rendu manuel modifie le matching.</li>
+  </ul>
+</main>
+<footer>ResumeMatch AI · Module Entretien · Mis à jour pour la notation Gemini et la puce du moteur · Indépendant du module Gestion des comptes.</footer>
+</article>
+</body>
+</html>
